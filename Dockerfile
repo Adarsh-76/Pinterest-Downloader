@@ -1,5 +1,5 @@
-# Use a lightweight Node.js image
-FROM node:18-slim
+# Use Node.js 20 to fix the File/undici ReferenceError
+FROM node:20-slim
 
 # Install Python (required to run yt-dlp), ffmpeg, and curl
 RUN apt-get update && apt-get install -y python3 ffmpeg curl
