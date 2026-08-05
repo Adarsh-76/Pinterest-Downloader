@@ -20,6 +20,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+
+
+// Health check route for UptimeRobot
+app.get('/', (req, res) => {
+  res.status(200).send('PinGrab Backend is Live!');
+});
+
+
 // Helper function: Extract using yt-dlp (Best for videos)
 function extractWithYtDlp(url) {
   return new Promise((resolve, reject) => {
