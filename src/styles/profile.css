@@ -40,10 +40,12 @@
   .profile-details {
     grid-column: span 8;
   }
-  ..profile-sidebar {
     grid-column: span 4;
   }
-}
+  .profile-sidebar {
+    grid-column: span 4;
+  }
+
 
 .detail-row {
   display: flex;
