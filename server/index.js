@@ -1,5 +1,8 @@
-
-// Add these lines at the very top of server/index.js with your other requires
+const express = require('express');
+const cors = require('cors');
+const { exec } = require('child_process');
+const axios = require('axios');
+const cheerio = require('cheerio');
 const dotenv = require('dotenv');
 const { createClient } = require('@supabase/supabase-js');
 
@@ -7,25 +10,13 @@ const { createClient } = require('@supabase/supabase-js');
 dotenv.config();
 
 // Initialize Supabase Admin Client (with service role key to bypass RLS)
-const supabaseAdmin = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  }
-);
-const express = require('express');
-const cors = require('cors');
-const { exec } = require('child_process');
-const axios = require('axios');
-const cheerio = require('cheerio');
+const supabaseAdmin = process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY 
+  ? createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, {
+      auth: { autoRefreshToken: false, persistSession: false }
+    })
+  : null;
 
 const app = express();
-const PORT = 3001;
-
 app.use(cors());
 app.use(express.json());
 
@@ -70,13 +61,8 @@ async function extractWithScraping(url) {
     if (videoUrl) {
       return { mediaUrl: videoUrl, title: 'Pinterest Video', isVideo: true };
     } else if (imageUrl) {
-      // CLEAN URL: Remove tracking parameters
       imageUrl = imageUrl.split('?')[0];
-      
-      // UPGRADE QUALITY: Replace standard sizes with 'originals' for max resolution
-      // Example: i.pinimg.com/736x/xx/yy/zz.jpg -> i.pinimg.com/originals/xx/yy/zz.jpg
       imageUrl = imageUrl.replace(/\/(736x|236x|474x|564x|600x|800x|1200x|originals)\//, '/originals/');
-      
       return { mediaUrl: imageUrl, title: 'Pinterest Image', isVideo: false };
     }
     
@@ -140,20 +126,19 @@ app.get('/api/download', async (req, res) => {
   }
 });
 
-
 // Secure Account Deletion Route
 app.post('/api/delete-account', async (req, res) => {
+  if (!supabaseAdmin) return res.status(500).json({ error: 'Server not configured for account deletion.' });
+
   const authHeader = req.headers.authorization;
   if (!authHeader) return res.status(401).json({ error: 'Missing auth header' });
 
   const token = authHeader.split(' ')[1];
 
   try {
-    // 1. Verify the user's token
     const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token);
     if (userError || !user) return res.status(401).json({ error: 'Invalid token' });
 
-    // 2. Delete the user from the auth.users table (This will cascade and delete their profile and history automatically due to our SQL setup!)
     const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(user.id);
     
     if (deleteError) throw deleteError;
@@ -165,6 +150,7 @@ app.post('/api/delete-account', async (req, res) => {
   }
 });
 
+// Use Render's dynamic port, or fallback to 3001 for local development
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`🚀 Backend server running on port ${PORT}`);
