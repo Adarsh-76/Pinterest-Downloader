@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 export function usePinterestExtractor() {
-  const [mediaData, setMediaData] = useState(null); // { mediaUrl, title, isVideo }
+  const [mediaData, setMediaData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -11,8 +11,9 @@ export function usePinterestExtractor() {
     setMediaData(null);
 
     try {
-      // Calling our local Express backend
-      const response = await fetch(`/api/extract?url=${encodeURIComponent(url)}`);
+      // Use the deployed backend URL, or fallback to /api for local dev
+      const baseUrl = import.meta.env.VITE_BACKEND_URL || '';
+      const response = await fetch(`${baseUrl}/api/extract?url=${encodeURIComponent(url)}`);
       const data = await response.json();
 
       if (!response.ok) {

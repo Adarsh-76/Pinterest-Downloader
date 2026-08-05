@@ -82,7 +82,7 @@ export default function History() {
                 
                 <div className="history-actions">
                   <a 
-                    href={`/api/download?url=${encodeURIComponent(item.media_url)}&isVideo=${item.is_video}`} 
+                    href={`${import.meta.env.VITE_BACKEND_URL || ''}/api/download?url=${encodeURIComponent(item.media_url)}&isVideo=${item.is_video}`}
                     className="history-btn"
                     download
                   >

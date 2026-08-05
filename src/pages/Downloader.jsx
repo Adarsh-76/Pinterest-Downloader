@@ -105,7 +105,7 @@ export default function Downloader() {
             */}
             <a 
               id="hidden-download-link"
-              href={`/api/download?url=${encodeURIComponent(mediaData.mediaUrl)}&isVideo=${mediaData.isVideo}`} 
+              href={`${import.meta.env.VITE_BACKEND_URL || ''}/api/download?url=${encodeURIComponent(mediaData.mediaUrl)}&isVideo=${mediaData.isVideo}`}
               style={{ display: 'none' }}
               download
             >
