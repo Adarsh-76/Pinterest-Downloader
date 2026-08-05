@@ -36,16 +36,18 @@
   gap: 1.5rem;
 }
 
+.profile-sidebar {
+  grid-column: span 12;
+}
+
 @media (min-width: 768px) {
   .profile-details {
     grid-column: span 8;
   }
-    grid-column: span 4;
-  }
   .profile-sidebar {
     grid-column: span 4;
   }
-
+}
 
 .detail-row {
   display: flex;
